@@ -2,12 +2,17 @@ package cz.uhk.GUI;
 
 import com.google.gson.Gson;
 import cz.uhk.tables.JsonWrapper;
+import cz.uhk.tables.MyCustomTableModel;
 import cz.uhk.tables.RozvrhovaAkce;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -17,35 +22,42 @@ import java.util.List;
 
 public class MainWindow extends JFrame {
 
-    private TableModel MyTableModel = new AbstractTableModel() {
-        private String[] columnNames = {"Předmět", "Název", "Den", "Start", "Konec", "Učitel"};
-        private Object[][] data = getData(parseData());
-
-        public String getColumnName(int col) {
-            return columnNames[col];
-        }
-
-        @Override
-        public int getRowCount() {
-            return data.length;
-        }
-
-        @Override
-        public int getColumnCount() {
-            return 6;
-        }
-
-        @Override
-        public Object getValueAt(int row, int col) {
-            return data[row][col];
-        }
-    };
+//    private TableModel MyTableModel = new AbstractTableModel() {
+//        private String[] columnNames = {"Předmět", "Název", "Den", "Start", "Konec", "Učitel"};
+//        private Object[][] data = getData(parseData());
+//
+//        public String getColumnName(int col) {
+//            return columnNames[col];
+//        }
+//
+//        public void updateData(Object[][] newData){
+//            this.data = newData;
+//            fireTableDataChanged();
+//        }
+//
+//        @Override
+//        public int getRowCount() {
+//            return data.length;
+//        }
+//
+//        @Override
+//        public int getColumnCount() {
+//            return 6;
+//        }
+//
+//        @Override
+//        public Object getValueAt(int row, int col) {
+//            return data[row][col];
+//        }
+//    };
 
     private JToolBar toolBar;
     private JComboBox<Object> buildingSelect;
     private JComboBox<Object> classSelect;
     private JButton doSomething;
     private JsonWrapper wrapper;
+    private String roomChoice;
+    private MyCustomTableModel MyTableModel;
 
     public MainWindow() {
         super("Timetables");
@@ -53,11 +65,23 @@ public class MainWindow extends JFrame {
 
         createToolBar();
 
+        MyTableModel = new MyCustomTableModel(getData(parseData()));
         JTable table = new JTable(MyTableModel);
         JScrollPane pane = new JScrollPane(table);
         add(pane, BorderLayout.CENTER);
 
-        tryData();
+        doSomething.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String room = (String) classSelect.getSelectedItem();
+
+                roomChoice = room;
+
+                Object[][] newData = getData(parseData());
+
+                MyTableModel.updateData(newData);
+            }
+        });
 
         setSize(800, 600);
         setLocationRelativeTo(null);
@@ -65,13 +89,13 @@ public class MainWindow extends JFrame {
 
     private void createToolBar() {
         String[] buildings = {"J"};
-        String[] classes = {"J23"};
+        String[] classes = {"J23", "J1"};
         toolBar = new JToolBar(JToolBar.HORIZONTAL);
         add(toolBar, BorderLayout.NORTH);
 
         buildingSelect = new JComboBox<>(buildings);
         classSelect = new JComboBox<>(classes);
-        doSomething = new JButton("View");
+        doSomething = new JButton("Update");
         toolBar.add(buildingSelect);
         toolBar.add(classSelect);
         toolBar.add(doSomething);
@@ -100,7 +124,9 @@ public class MainWindow extends JFrame {
     }
 
     public void tryData(){
-        String url = "https://stag-demo.uhk.cz/ws/services/rest2/rozvrhy/getRozvrhByMistnost?semestr=%25&budova=J&mistnost=J23&outputFormat=JSON";
+        String room;
+        if (roomChoice == null){room = "J23";} else {room = roomChoice;}
+        String url = "https://stag-demo.uhk.cz/ws/services/rest2/rozvrhy/getRozvrhByMistnost?semestr=%25&budova=J&mistnost=" + room + "&outputFormat=JSON";
 
         try {
             URL obj = new URL(url);  //making the url
