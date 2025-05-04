@@ -1,12 +1,16 @@
 package cz.uhk.GUI;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.*;
@@ -42,6 +46,7 @@ public class MainWindow extends JFrame {
     private JComboBox<Object> buildingSelect;
     private JComboBox<Object> classSelect;
     private JButton doSomething;
+    private JsonObject json;
 
     public MainWindow() {
         super("Timetables");
@@ -81,5 +86,28 @@ public class MainWindow extends JFrame {
     public void tryData(){
         String url = "https://stag-demo.uhk.cz/ws/services/rest2/rozvrhy/getRozvrhByMistnost?semestr=%25&budova=J&mistnost=J1&outputFormat=JSON";
 
+        try {
+            URL obj = new URL(url);  //making the url
+            HttpURLConnection connection = (HttpURLConnection) obj.openConnection();   //opening the connection
+
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));  //reading data from the server
+
+            //below we build the response into something workable
+            String input;
+            StringBuilder response = new StringBuilder();
+
+            while ((input = in.readLine()) != null){
+                response.append(input);
+            }
+            in.close(); //closing the stream, don't know if needed but might as well
+
+            //using Gson to create a usable Json
+            Gson gson = new Gson();
+            json = gson.fromJson(response.toString(), JsonObject.class);
+
+            System.out.println("Parsed JSON: " + json);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
