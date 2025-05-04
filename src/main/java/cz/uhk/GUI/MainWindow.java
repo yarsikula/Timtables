@@ -18,8 +18,8 @@ import java.util.List;
 public class MainWindow extends JFrame {
 
     private TableModel MyTableModel = new AbstractTableModel() {
-        private String[] columnNames = {"1", "2", "3", "4", "5", "6"};
-        private Object[][] data = getData();
+        private String[] columnNames = {"Předmět", "Název", "Den", "Start", "Konec", "Učitel"};
+        private Object[][] data = getData(parseData());
 
         public String getColumnName(int col) {
             return columnNames[col];
@@ -32,7 +32,7 @@ public class MainWindow extends JFrame {
 
         @Override
         public int getColumnCount() {
-            return 3;
+            return 6;
         }
 
         @Override
@@ -77,8 +77,25 @@ public class MainWindow extends JFrame {
         toolBar.add(doSomething);
     }
 
-    public Object[][] getData(){
-        Object[][] ret = {{"test1", "test2", "test3"}};
+    public Object[][] getData(Object[][] origData){
+        //getting a size for a final Object
+        int count = 0;
+        for (int i = 0; i < origData.length; i++){
+            if (origData[i][0] != null){count++;}
+        }
+
+        Object[][] ret = new Object[count][6];
+
+        int retIndex = 0;
+        for (int i = 0; i < origData.length; i++){
+            if (origData[i][0] != null){
+                for (int j = 1; j < 7; j++){
+                    ret[retIndex][j-1] = origData[i][j];
+                }
+                retIndex++;
+            }
+        }
+
         return ret;
     }
 
@@ -106,7 +123,10 @@ public class MainWindow extends JFrame {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
 
+    public Object[][] parseData(){
+        tryData();
         List<RozvrhovaAkce> items = wrapper.rozvrhovaAkce;
         Object[][] data = new Object[items.size()][7];
 
@@ -134,8 +154,6 @@ public class MainWindow extends JFrame {
             }
         }
 
-        for (Object[] row : data) {
-            System.out.println(java.util.Arrays.toString(row));
-        }
+        return data;
     }
 }
