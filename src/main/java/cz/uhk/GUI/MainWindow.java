@@ -6,10 +6,6 @@ import cz.uhk.tables.MyCustomTableModel;
 import cz.uhk.tables.RozvrhovaAkce;
 
 import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,35 +17,6 @@ import java.util.List;
 
 
 public class MainWindow extends JFrame {
-
-//    private TableModel MyTableModel = new AbstractTableModel() {
-//        private String[] columnNames = {"Předmět", "Název", "Den", "Start", "Konec", "Učitel"};
-//        private Object[][] data = getData(parseData());
-//
-//        public String getColumnName(int col) {
-//            return columnNames[col];
-//        }
-//
-//        public void updateData(Object[][] newData){
-//            this.data = newData;
-//            fireTableDataChanged();
-//        }
-//
-//        @Override
-//        public int getRowCount() {
-//            return data.length;
-//        }
-//
-//        @Override
-//        public int getColumnCount() {
-//            return 6;
-//        }
-//
-//        @Override
-//        public Object getValueAt(int row, int col) {
-//            return data[row][col];
-//        }
-//    };
 
     private JToolBar toolBar;
     private JComboBox<Object> buildingSelect;
@@ -73,12 +40,12 @@ public class MainWindow extends JFrame {
         doSomething.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //getting the selected room and changing it globally
                 String room = (String) classSelect.getSelectedItem();
-
                 roomChoice = room;
 
+                //getting new data and passing them to the table model
                 Object[][] newData = getData(parseData());
-
                 MyTableModel.updateData(newData);
             }
         });
@@ -89,7 +56,7 @@ public class MainWindow extends JFrame {
 
     private void createToolBar() {
         String[] buildings = {"J"};
-        String[] classes = {"J23", "J1"};
+        String[] classes = {"J23", "J1", "J30", "J15", "J6", "J8"};
         toolBar = new JToolBar(JToolBar.HORIZONTAL);
         add(toolBar, BorderLayout.NORTH);
 
@@ -110,6 +77,7 @@ public class MainWindow extends JFrame {
 
         Object[][] ret = new Object[count][6];
 
+        //filling up the new object
         int retIndex = 0;
         for (int i = 0; i < origData.length; i++){
             if (origData[i][0] != null){
@@ -124,6 +92,7 @@ public class MainWindow extends JFrame {
     }
 
     public void tryData(){
+        //building URL
         String room;
         if (roomChoice == null){room = "J23";} else {room = roomChoice;}
         String url = "https://stag-demo.uhk.cz/ws/services/rest2/rozvrhy/getRozvrhByMistnost?semestr=%25&budova=J&mistnost=" + room + "&outputFormat=JSON";
@@ -152,10 +121,12 @@ public class MainWindow extends JFrame {
     }
 
     public Object[][] parseData(){
+        //calls the data and prepares it for work
         tryData();
         List<RozvrhovaAkce> items = wrapper.rozvrhovaAkce;
         Object[][] data = new Object[items.size()][7];
 
+        //getting all the info we need from the Json
         for (int i = 0; i < items.size(); i++){
             RozvrhovaAkce item = items.get(i);
 

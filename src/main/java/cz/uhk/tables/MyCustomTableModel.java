@@ -1,12 +1,12 @@
 package cz.uhk.tables;
 
 import javax.swing.table.AbstractTableModel;
-import java.io.ObjectStreamException;
 
 public class MyCustomTableModel extends AbstractTableModel {
     private String[] columnNames = {"Předmět", "Název", "Den", "Start", "Konec", "Učitel"};
     private Object[][] data;
 
+    //constructor i guess
     public MyCustomTableModel(Object[][] inData){
         this.data = inData;
     }
@@ -15,6 +15,7 @@ public class MyCustomTableModel extends AbstractTableModel {
         return columnNames[col];
     }
 
+    //for the damn updates
     public void updateData(Object[][] newData){
         this.data = newData;
         fireTableDataChanged();

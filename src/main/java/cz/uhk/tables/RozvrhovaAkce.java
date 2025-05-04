@@ -41,4 +41,5 @@ public class RozvrhovaAkce {
     public static class TimeWrapper {
         public String value;
     }
+    //No idea if i need all of it. But it's working so I won't touch it.
 }
